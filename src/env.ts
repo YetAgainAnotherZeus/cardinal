@@ -6,7 +6,7 @@ export const env = createEnv({
     DISCORD_CLIENT_ID: z.string().min(1),
     DISCORD_TOKEN: z.string().min(1),
     DISCORD_DEV_GUILD_ID: z.string().min(1),
-    DISCORD_SHARD_COUNT: z.number().int().min(1),
+    DISCORD_SHARD_COUNT: z.coerce.number().int().min(1),
     DATABASE_URL: z.string().min(1),
     DATABASE_NAMESPACE: z.string().min(1),
     DATABASE_USERNAME: z.string().min(1),
