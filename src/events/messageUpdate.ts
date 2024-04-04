@@ -1,4 +1,4 @@
-import { ChannelType, Message } from "discord.js";
+import { Message } from "discord.js";
 import { BotEvent } from "../types";
 
 const event: BotEvent = {

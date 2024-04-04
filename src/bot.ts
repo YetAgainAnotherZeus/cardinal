@@ -1,9 +1,4 @@
-// FIXME: using this: https://github.com/MericcaN41/discordjs-v14-template-ts/blob/main/src/index.ts
-// and https://github.com/fellipeutaka/discord-bot-template/blob/main/src/index.ts
-
 import { Client, Collection, GatewayIntentBits } from "discord.js";
-// import { commands } from "./commands";
-// import { deployCommands } from "./deploy-commands";
 import { env } from "./env";
 import { readdirSync } from "fs";
 import { join } from "path";
