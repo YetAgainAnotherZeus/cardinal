@@ -1,8 +1,8 @@
-import { Client } from "discord.js";
+import { Client, Events } from "discord.js";
 import { BotEvent } from "../types";
 
 const event: BotEvent = {
-  name: "ready",
+  name: Events.ClientReady,
   once: true,
   execute: (client: Client) => {
     client.logger.log("🤖 Ensuring all guilds are in the database");

@@ -2,7 +2,7 @@ import { Client, Collection, GatewayIntentBits } from "discord.js";
 import { env } from "./env";
 import { readdirSync } from "fs";
 import { join } from "path";
-import { SlashCommand } from "./types";
+import { ComponentButtonInteraction, SlashCommand } from "./types";
 import { Logger } from "./lib/logger";
 import { i18nInstance } from "./lib/i18n";
 import { Database } from "./lib/db";
@@ -18,6 +18,7 @@ import { Anilist } from "./lib/anilist";
     });
 
     client.slashCommands = new Collection<string, SlashCommand>();
+    client.buttons = new Collection<string, ComponentButtonInteraction>();
     client.cooldowns = new Collection<string, number>();
 
     client.logger = new Logger(client.shard?.ids);

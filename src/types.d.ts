@@ -1,8 +1,11 @@
 import {
     SlashCommandBuilder,
     Collection,
-    AutocompleteInteraction,
     ChatInputCommandInteraction,
+    AutocompleteInteraction,
+    ModalSubmitInteraction,
+    ButtonInteraction,
+    type Events
 } from "discord.js";
 import { Logger } from "./lib/logger";
 import { i18nInstance } from "./lib/i18n";
@@ -17,13 +20,18 @@ export interface SlashCommand {
     cooldown?: number; // in seconds
 }
 
+export interface ComponentButtonInteraction {
+    customId: string;
+    execute: (interaction: ButtonInteraction) => void;
+}
+
 interface GuildOptions {
     prefix: string;
 }
 
 export type GuildOption = keyof GuildOptions;
 export interface BotEvent {
-    name: string;
+    name: Events;
     once?: boolean | false;
     execute: (...args) => void;
 }
@@ -31,6 +39,7 @@ export interface BotEvent {
 declare module "discord.js" {
     export interface Client {
         slashCommands: Collection<string, SlashCommand>;
+        buttons: Collection<string, ComponentButtonInteraction>;
         commands: Collection<string, Command>;
         cooldowns: Collection<string, number>;
         logger: Logger;

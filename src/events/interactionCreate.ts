@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, Interaction } from "discord.js";
+import { ApplicationCommandOptionType, Events, Interaction } from "discord.js";
 import { BotEvent } from "../types";
 import chalk from "chalk";
 
@@ -9,7 +9,7 @@ import chalk from "chalk";
  */
 
 const event: BotEvent = {
-    name: "interactionCreate",
+    name: Events.InteractionCreate,
     execute: (interaction: Interaction) => {
         if (interaction.isChatInputCommand()) {
             const command = interaction.client.slashCommands.get(
@@ -99,6 +99,20 @@ const event: BotEvent = {
             try {
                 if (!command.modal) return;
                 command.modal(interaction);
+            } catch (error) {
+                console.error(error);
+            }
+        } else if (interaction.isButton()) {
+            const button = interaction.client.buttons.get(interaction.customId);
+            if (!button) {
+                console.error(
+                    `No buttons matching ${interaction.customId} was found.`
+                );
+                return;
+            }
+            try {
+                if (!button) return;
+                button.execute(interaction);
             } catch (error) {
                 console.error(error);
             }

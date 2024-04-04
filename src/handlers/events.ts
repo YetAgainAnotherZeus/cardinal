@@ -11,8 +11,8 @@ module.exports = (client: Client) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires -- dynamic import
     const event: BotEvent = require(`${eventsDir}/${file}`).default;
     event.once
-      ? client.once(event.name, (...args) => event.execute(...args))
-      : client.on(event.name, (...args) => event.execute(...args));
+      ? client.once(event.name.toString(), (...args) => event.execute(...args))
+      : client.on(event.name.toString(), (...args) => event.execute(...args));
     client.logger.log(`🌠 Successfully loaded event ${event.name}`);
   });
 };
