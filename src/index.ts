@@ -5,7 +5,7 @@ import { join } from "path";
 const botFile = join(__dirname, "./bot.js");
 const manager = new ShardingManager(botFile, {
     token: env.DISCORD_TOKEN,
-    totalShards: 1,
+    totalShards: env.DISCORD_SHARD_COUNT,
 });
 
 manager.on("shardCreate", (shard) =>
