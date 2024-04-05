@@ -1,0 +1,8 @@
+.github/
+build/
+node_modules/
+.env
+.eslintignore
+.eslintrc.json
+.gitignore
+*.surql
