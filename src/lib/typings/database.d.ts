@@ -30,16 +30,18 @@ export interface TableUser {
     displayName: string | undefined;
 }
 
+export interface TableCharacterName {
+    full: string;
+    native: string;
+    userPreferred: string;
+    alternative: string[];
+    alternativeSpoiler: string[];
+}
+
 export interface TableCharacter {
     id: string;
     characterId: number;
-    name: {
-        full: string;
-        native: string;
-        userPreferred: string;
-        alternative: string[];
-        alternativeSpoiler: string[];
-    };
+    name: TableCharacterName;
     image: string;
     siteUrl: string;
 }

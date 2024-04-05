@@ -17,7 +17,7 @@ const command: SlashCommand = {
         .setDMPermission(false)
         .addSubcommand((subcommand) => {
             return subcommand
-                .setName("guild_link_unique")
+                .setName("guild-link-unique")
                 .setDescription("Toggle if the guild link are unique")
                 .addBooleanOption((option) =>
                     option
@@ -103,7 +103,7 @@ export default command;
 async function handleConfig(
     interaction: ChatInputCommandInteraction<CacheType>
 ) {
-    if (interaction.options.getSubcommand() === "guild_link_unique") {
+    if (interaction.options.getSubcommand() === "guild-link-unique") {
         const value = interaction.options.getBoolean("value", true);
         await interaction.client.db.setGuildOption(
             interaction,
@@ -113,7 +113,7 @@ async function handleConfig(
 
         const embed = new EmbedBuilder()
             .setColor(Colors.Blue)
-            .setDescription(`Set \`guild_link_unique\` to \`${value}\``);
+            .setDescription(`Set \`guild-link-unique\` to \`${value}\``);
 
         interaction.editReply({
             embeds: [embed],

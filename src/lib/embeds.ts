@@ -9,7 +9,7 @@ export const characterCard = (character: Character): EmbedBuilder => {
         .setTitle(`${character.name.full} (${character.name.native})`)
         .setURL(`${character.siteUrl}`)
         .setDescription(
-            `${character.media.nodes[0].title.userPreferred} (${character.media.nodes[0].format})`,
+            `${character.media.nodes[0].title.english ?? character.media.nodes[0].title.userPreferred} (${character.media.nodes[0].format})`,
         )
         .addFields(
             {

@@ -140,17 +140,20 @@ export class Database {
 
     async linkCharacter(
         interaction: BaseInteraction<CacheType>,
-        characterId: number
+        characterId: number,
+        characterName: string
     ) {
         const result: TableLink[] = await this.client.query(
             `CREATE ONLY link SET
             guild = type::thing((SELECT VALUE id FROM ONLY guild WHERE guildId = $guild LIMIT 1)),
             user = type::thing((SELECT VALUE id FROM ONLY user WHERE userId = $user LIMIT 1)),
-            character = type::thing((SELECT VALUE id FROM ONLY character WHERE characterId = $character LIMIT 1));`,
+            character = type::thing((SELECT VALUE id FROM ONLY character WHERE characterId = $character LIMIT 1)),
+            name = $name;`,
             {
                 guild: interaction.guildId,
                 user: interaction.user.id,
                 character: characterId,
+                name: characterName,
             }
         );
 
@@ -162,6 +165,16 @@ export class Database {
             "DELETE FROM link WHERE id = $linkId;",
             {
                 linkId: linkId,
+            }
+        );
+    }
+
+    async setLinkName(linkId: string, name: string) {
+        await this.client.query(
+            "UPDATE link SET name = $name WHERE id = $linkId;",
+            {
+                linkId: linkId,
+                name: name,
             }
         );
     }

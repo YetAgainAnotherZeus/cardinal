@@ -12,6 +12,7 @@ const command: SlashCommand = {
                 .setDescription("The id of the character")
                 .setRequired(true)
                 .setAutocomplete(true)
+                .setMinValue(1)
         )
         .setDescription("Get a character by id"),
     autocomplete: async (interaction) => {
@@ -29,7 +30,7 @@ const command: SlashCommand = {
             return interaction.respond([]);
         }
 
-        let nameAndTitle = `${data.name.userPreferred} (${data.media.nodes[0].title.userPreferred})`;
+        let nameAndTitle = `${data.name.full} (${data.media.nodes[0].title.english ?? data.media.nodes[0].title.userPreferred})`;
 
         if (nameAndTitle.length > 100) {
             nameAndTitle = nameAndTitle.slice(0, 97) + "...";

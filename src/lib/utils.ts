@@ -55,7 +55,6 @@ export async function handleRenameGuildMember(
     interaction: BaseInteraction<CacheType>,
     nickname: string
 ) {
-    let failMessage;
     if (interaction.member instanceof GuildMember) {
         try {
             await interaction.member.setNickname(nickname);
@@ -65,15 +64,7 @@ export async function handleRenameGuildMember(
                     `[G#${interaction.guildId}][U#${interaction.user.id}]`
                 )} Can't set nickname to ${chalk.green(`[${nickname}]`)}`
             );
-            failMessage = await interaction.channel?.send("Failed to set nickname");
         }
-    } else {
-        failMessage = await interaction.channel?.send("Failed to set nickname");
-    }
-
-    if (failMessage) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        await failMessage.delete();
     }
 }
 

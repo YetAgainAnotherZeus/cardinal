@@ -12,14 +12,11 @@ const command: SlashCommand = {
                 .setDescription("The name of the character")
                 .setRequired(true)
                 .setAutocomplete(true)
+                .setMinLength(2)
         )
         .setDescription("Search for a character"),
     autocomplete: async (interaction) => {
         const name = interaction.options.getFocused();
-
-        if (name.length <= 1) {
-            return interaction.respond([]);
-        }
 
         const data = await interaction.client.anilist.searchCharactersByName(
             name
@@ -32,7 +29,7 @@ const command: SlashCommand = {
         interaction.respond(
             data.characters.map((character) => {
                 return {
-                    name: `${character.name.full} (${character.media.nodes[0].title.userPreferred})`,
+                    name: `${character.name.full} (${character.media.nodes[0].title.english ?? character.media.nodes[0].title.userPreferred})`,
                     value: character.id.toString(),
                 };
             })

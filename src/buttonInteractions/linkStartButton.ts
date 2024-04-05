@@ -49,9 +49,15 @@ const button: ComponentButtonInteraction = {
             character = res;
         } while (!character);
 
+        await interaction.deferUpdate();
+
         await interaction.client.db.ensureCharacter(interaction, character.id);
 
-        await handleRenameGuildMember(interaction, character.name.userPreferred);
+        await handleRenameGuildMember(interaction, character.name.full);
+
+        const currentLink = await interaction.client.db.getCurrentLink(interaction);
+        if (currentLink) await interaction.client.db.unlinkCharacter(currentLink.id);
+        await interaction.client.db.linkCharacter(interaction, character.id, character.name.full);
 
         if (tableGuild.options.role?.remove && interaction.member && interaction.guild) {
             const role = interaction.guild.roles.cache.get(tableGuild.options.role.remove);
@@ -68,8 +74,9 @@ const button: ComponentButtonInteraction = {
         }
 
         const embed = new EmbedBuilder()
+            .setColor(Colors.Blue)
             .setDescription(
-                `<@${interaction.user.id}>, You are now linked to \`${character.name.userPreferred}\``
+                `<@${interaction.user.id}>, You are now linked to \`${character.name.full}\``
             );
 
         const message = await interaction.channel?.send({

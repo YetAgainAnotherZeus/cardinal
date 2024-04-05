@@ -16,14 +16,11 @@ const command: SlashCommand = {
                 .setDescription("The name of the character")
                 .setRequired(true)
                 .setAutocomplete(true)
+                .setMinLength(2)
         )
         .setDescription("Link to a character"),
     autocomplete: async (interaction) => {
         const name = interaction.options.getFocused();
-
-        if (name.length <= 1) {
-            return interaction.respond([]);
-        }
 
         const data = await interaction.client.anilist.searchCharactersByName(
             name
@@ -36,7 +33,7 @@ const command: SlashCommand = {
         interaction.respond(
             data.characters.map((character) => {
                 return {
-                    name: `${character.name.full} (${character.media.nodes[0].title.userPreferred})`,
+                    name: `${character.name.full} (${character.media.nodes[0].title.english ?? character.media.nodes[0].title.userPreferred})`,
                     value: character.id.toString(),
                 };
             })
@@ -91,15 +88,15 @@ const command: SlashCommand = {
             return interaction.reply("Character is already linked");
         }
 
-        if (currentLink) await interaction.client.db.unlinkCharacter(currentLink?.id);
-        await interaction.client.db.linkCharacter(interaction, id);
+        if (currentLink) await interaction.client.db.unlinkCharacter(currentLink.id);
+        await interaction.client.db.linkCharacter(interaction, id, character.name.full);
 
-        await handleRenameGuildMember(interaction, character.name.userPreferred);
+        await handleRenameGuildMember(interaction, character.name.full);
 
         const embed = new EmbedBuilder()
             .setColor(Colors.Blue)
             .setDescription(
-                `<@${interaction.user.id}> successfully linked to \`${character.name.userPreferred}\``
+                `<@${interaction.user.id}> successfully linked to \`${character.name.full}\``
             );
 
         interaction.reply({

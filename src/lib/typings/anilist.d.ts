@@ -49,7 +49,6 @@ export interface ApiError {
     statusText: string;
 }
 
-// query { Page(page: 0, perPage: 1) { pageInfo { total } characters(sort: ID_DESC) { id } } }
 export interface LastCharacterId {
     Page: {
         pageInfo: {

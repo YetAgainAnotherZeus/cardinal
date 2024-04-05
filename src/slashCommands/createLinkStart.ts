@@ -3,7 +3,7 @@ import { SlashCommand } from "../types";
 
 const command: SlashCommand = {
     command: new SlashCommandBuilder()
-        .setName("create_link_start")
+        .setName("create-link-start")
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false)
         .setDescription("Create a link start for your server"),
