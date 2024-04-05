@@ -32,8 +32,10 @@ const command: SlashCommand = {
 
         interaction.respond(
             data.characters.map((character) => {
+                let responseName = `${character.name.full} (${character.media.nodes[0].title.english ?? character.media.nodes[0].title.userPreferred})`;
+                responseName = responseName.length > 100 ? responseName.slice(0, 97) + "..." : responseName;
                 return {
-                    name: `${character.name.full} (${character.media.nodes[0].title.english ?? character.media.nodes[0].title.userPreferred})`,
+                    name: responseName,
                     value: character.id.toString(),
                 };
             })
