@@ -78,6 +78,8 @@ export function displayInteractionOption(
                     return `${option.name}:${displayInteractionOption(
                         option.options ?? []
                     )}`;
+                case ApplicationCommandOptionType.String:
+                    return `${option.name}:"${option.value}"`;
                 default:
                     return `${option.name}:${option.value}`;
             }
