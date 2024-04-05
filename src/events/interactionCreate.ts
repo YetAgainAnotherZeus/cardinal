@@ -1,6 +1,7 @@
 import { ApplicationCommandOptionType, Events, Interaction } from "discord.js";
 import { BotEvent } from "../types";
 import chalk from "chalk";
+import { displayInteractionOption } from "../lib/utils";
 
 /**
  * This event is specifically for handling slash commands and their interactions
@@ -10,7 +11,9 @@ import chalk from "chalk";
 
 const event: BotEvent = {
     name: Events.InteractionCreate,
-    execute: (interaction: Interaction) => {
+    execute: async (interaction: Interaction) => {
+        await interaction.client.db.ensureUser(interaction);
+
         if (interaction.isChatInputCommand()) {
             const command = interaction.client.slashCommands.get(
                 interaction.commandName
@@ -44,30 +47,13 @@ const event: BotEvent = {
                     Date.now() + command.cooldown * 1000
                 );
             }
-            const options = interaction.options.data
-                .map((option) => {
-                    if (
-                        option.type === ApplicationCommandOptionType.Subcommand
-                    ) {
-                        if (option.options === undefined)
-                            return `${option.name}`;
-                        return `${option.name}:[${option.options
-                            .map(
-                                (subOption) =>
-                                    `${subOption.name}:${subOption.value}`
-                            )
-                            .join(", ")}]`;
-                    } else {
-                        return `${option.name}:${option.value}`;
-                    }
-                })
-                .join(", ");
+            const options = displayInteractionOption(interaction.options.data);
             interaction.client.logger.info(
                 `${chalk.blue(
                     `[G#${interaction.guildId}] [U#${interaction.user.id}]`
                 )} Command '${
                     interaction.commandName
-                }' executed with ${chalk.green(`[${options}]`)}`
+                }' executed with ${chalk.green(options)}`
             );
             command.execute(interaction);
         } else if (interaction.isAutocomplete()) {
@@ -75,7 +61,7 @@ const event: BotEvent = {
                 interaction.commandName
             );
             if (!command) {
-                console.error(
+                interaction.client.logger.error(
                     `No command matching ${interaction.commandName} was found.`
                 );
                 return;
@@ -91,7 +77,7 @@ const event: BotEvent = {
                 interaction.customId
             );
             if (!command) {
-                console.error(
+                interaction.client.logger.error(
                     `No command matching ${interaction.customId} was found.`
                 );
                 return;
@@ -105,9 +91,9 @@ const event: BotEvent = {
         } else if (interaction.isButton()) {
             const button = interaction.client.buttons.get(interaction.customId);
             if (!button) {
-                console.error(
-                    `No buttons matching ${interaction.customId} was found.`
-                );
+                // interaction.client.logger.error(
+                //     `No buttons matching ${interaction.customId} was found.`
+                // );
                 return;
             }
             try {

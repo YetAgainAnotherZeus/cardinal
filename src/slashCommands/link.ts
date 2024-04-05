@@ -9,6 +9,7 @@ import { handleApiError, handleRenameGuildMember } from "../lib/utils";
 const command: SlashCommand = {
     command: new SlashCommandBuilder()
         .setName("link")
+        .setDMPermission(false)
         .addStringOption((option) =>
             option
                 .setName("name")
@@ -90,6 +91,7 @@ const command: SlashCommand = {
             return interaction.reply("Character is already linked");
         }
 
+        if (currentLink) await interaction.client.db.unlinkCharacter(currentLink?.id);
         await interaction.client.db.linkCharacter(interaction, id);
 
         await handleRenameGuildMember(interaction, character.name.userPreferred);

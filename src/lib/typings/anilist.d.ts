@@ -48,3 +48,15 @@ export interface ApiError {
     status: number;
     statusText: string;
 }
+
+// query { Page(page: 0, perPage: 1) { pageInfo { total } characters(sort: ID_DESC) { id } } }
+export interface LastCharacterId {
+    Page: {
+        pageInfo: {
+            total: number;
+        };
+        characters: {
+            id: number;
+        }[];
+    };
+}

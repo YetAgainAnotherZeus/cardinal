@@ -1,10 +1,26 @@
 export type TableRecord<T> = T | string;
 
+export interface TableGuildOptionsLinkStart {
+    channel: string;
+    message: string;
+}
+
+export interface TableGuildOptionsRole {
+    remove: string;
+    add: string;
+}
+
+export interface TableGuildOptions {
+    isLinkUnique: boolean;
+    linkStart: TableGuildOptionsLinkStart | undefined;
+    role: TableGuildOptionsRole | undefined;
+}
+
 export interface TableGuild {
     id: string;
     guildId: string;
     name: string;
-    isLinkUnique: boolean;
+    options: TableGuildOptions;
 }
 
 export interface TableUser {
@@ -45,4 +61,4 @@ export interface TableLinkHistory {
     to: string;
 }
 
-export type FieldGuildOptions = "isGuildLinkUnique";
+export type FieldGuildOptions = "isLinkUnique" | "linkStart" | "role";

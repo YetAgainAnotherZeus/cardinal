@@ -10,6 +10,7 @@ import {
     CharacterSearch,
     Data,
     GetResponse,
+    LastCharacterId,
     SearchResponse,
 } from "./typings/anilist";
 
@@ -109,5 +110,32 @@ export class Anilist {
         this.addCharacterToCache(res.data.Character);
 
         return res.data.Character;
+    }
+
+    async getLatestCharacterId(): Promise<number | ApiError> {
+        const res: Data<LastCharacterId> | ApiError = await this.axios
+            .post(
+                "https://graphql.anilist.co",
+                JSON.stringify({
+                    query: queries.get.lastCharacterId,
+                }),
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                }
+            )
+            .then((res) => res.data)
+            .catch((err) => {
+                return {
+                    status: err.response.status,
+                    statusText: err.response.statusText,
+                };
+            });
+
+        if ("status" in res) return res;
+
+        return res.data.Page.characters[0].id;
     }
 }

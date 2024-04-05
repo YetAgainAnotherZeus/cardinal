@@ -1,7 +1,9 @@
 import {
+    ApplicationCommandOptionType,
+    BaseInteraction,
     CacheType,
-    ChatInputCommandInteraction,
     Colors,
+    CommandInteractionOption,
     EmbedBuilder,
     GuildMember,
 } from "discord.js";
@@ -9,7 +11,7 @@ import { ApiError } from "./typings/anilist";
 import chalk from "chalk";
 
 export function handleApiError(
-    interaction: ChatInputCommandInteraction<CacheType>,
+    interaction: BaseInteraction<CacheType>,
     error: ApiError
 ) {
     interaction.client.logger.error(
@@ -44,28 +46,52 @@ export function handleApiError(
                 helpMessage ? `\n${helpMessage}` : ""
             }`
         );
-    return interaction.reply({
+    return interaction.channel?.send({
         embeds: [embed],
-        ephemeral: true,
     });
 }
 
 export async function handleRenameGuildMember(
-    interaction: ChatInputCommandInteraction<CacheType>,
+    interaction: BaseInteraction<CacheType>,
     nickname: string
 ) {
+    let failMessage;
     if (interaction.member instanceof GuildMember) {
         try {
             await interaction.member.setNickname(nickname);
         } catch (error) {
             interaction.client.logger.error(
                 `${chalk.blue(
-                    `[U#${interaction.user.id}]`
+                    `[G#${interaction.guildId}][U#${interaction.user.id}]`
                 )} Can't set nickname to ${chalk.green(`[${nickname}]`)}`
             );
-            await interaction.channel?.send("Failed to set nickname");
+            failMessage = await interaction.channel?.send("Failed to set nickname");
         }
     } else {
-        await interaction.channel?.send("Failed to set nickname");
+        failMessage = await interaction.channel?.send("Failed to set nickname");
     }
+
+    if (failMessage) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await failMessage.delete();
+    }
+}
+
+export function displayInteractionOption(
+    optionsData: readonly CommandInteractionOption<CacheType>[]
+): string {
+    const options = optionsData
+        .map((option) => {
+            switch (option.type) {
+                case ApplicationCommandOptionType.Subcommand:
+                    return `${option.name}:${displayInteractionOption(
+                        option.options ?? []
+                    )}`;
+                default:
+                    return `${option.name}:${option.value}`;
+            }
+        })
+        .join(", ");
+
+    return `[${options}]`;
 }

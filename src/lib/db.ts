@@ -2,7 +2,7 @@ import { Root, Surreal } from "surrealdb.node";
 
 import { env } from "../env";
 import { FieldGuildOptions, TableCharacter, TableLink } from "./typings/database";
-import { CacheType, ChatInputCommandInteraction } from "discord.js";
+import { BaseInteraction, CacheType, ChatInputCommandInteraction } from "discord.js";
 import { ApiError } from "./typings/anilist";
 
 export class Database {
@@ -25,8 +25,46 @@ export class Database {
         await this.client.use({ ns: env.DATABASE_NAMESPACE, db: "cardinal" });
     }
 
+    async ensureGuild(interaction: BaseInteraction<CacheType>) {
+        let guild: { guildId: string }[] = await this.client.query(
+            "SELECT guildId FROM guild WHERE guildId = $guildId",
+            {
+                guildId: interaction.guildId,
+            }
+        );
+
+        if (!guild.length) {
+            const guildName = interaction.guild ? interaction.guild.name : "";
+            guild = await this.client.create("guild", {
+                guildId: interaction.guildId,
+                name: guildName,
+            });
+        }
+
+        return guild[0];
+    }
+
+    async ensureUser(interaction: BaseInteraction<CacheType>) {
+        let user: { userId: string }[] = await this.client.query(
+            "SELECT userId FROM user WHERE userId = $userId",
+            {
+                userId: interaction.user.id,
+            }
+        );
+
+        if (!user.length) {
+            user = await this.client.create("user", {
+                userId: interaction.user.id,
+                name: interaction.user.username,
+                displayName: interaction.user.displayName,
+            });
+        }
+
+        return user[0];
+    }
+
     async ensureCharacter(
-        interaction: ChatInputCommandInteraction<CacheType>,
+        interaction: BaseInteraction<CacheType>,
         characterId: number
     ): Promise<TableCharacter | ApiError> {
         let character: TableCharacter | undefined = await this.client
@@ -61,7 +99,7 @@ export class Database {
     }
 
     async isGuildLinkUnique(
-        interaction: ChatInputCommandInteraction<CacheType>
+        interaction: BaseInteraction<CacheType>
     ) {
         const result: boolean[] = await this.client.query(
             "SELECT VALUE isLinkUnique FROM ONLY guild WHERE guildId = $guildId LIMIT 1;",
@@ -74,7 +112,7 @@ export class Database {
     }
 
     async isCharacterAlreadyLinked(
-        interaction: ChatInputCommandInteraction<CacheType>,
+        interaction: BaseInteraction<CacheType>,
         characterId: number
     ) {
         const result: Pick<TableLink, "id">[] = await this.client.query(
@@ -88,7 +126,7 @@ export class Database {
         return Boolean(result[0]);
     }
 
-    async getCurrentLink(interaction: ChatInputCommandInteraction<CacheType>): Promise<TableLink | undefined> {
+    async getCurrentLink(interaction: BaseInteraction<CacheType>): Promise<TableLink | undefined> {
         const link: TableLink[] = await this.client.query(
             "SELECT * FROM ONLY link WHERE user.userId = $userId AND guild.guildId = $guildId LIMIT 1 FETCH user, guild, character;",
             {
@@ -101,7 +139,7 @@ export class Database {
     }
 
     async linkCharacter(
-        interaction: ChatInputCommandInteraction<CacheType>,
+        interaction: BaseInteraction<CacheType>,
         characterId: number
     ) {
         const result: TableLink[] = await this.client.query(
@@ -128,16 +166,57 @@ export class Database {
         );
     }
 
+    async getGuildOption(
+        interaction: BaseInteraction<CacheType>,
+        key: FieldGuildOptions
+    ) {
+        const result: boolean[] = await this.client.query(
+            `SELECT VALUE options.${key} FROM ONLY guild WHERE guildId = $guildId LIMIT 1;`,
+            {
+                guildId: interaction.guildId,
+            }
+        );
+
+        return result[0];
+    }
+
     async setGuildOption(
-        interaction: ChatInputCommandInteraction<CacheType>,
+        interaction: BaseInteraction<CacheType>,
         key: FieldGuildOptions,
         value: any
     ) {
         await this.client.query(
-            `UPDATE guild SET ${key} = $value WHERE guildId = $guildId;`,
+            `UPDATE guild SET options.${key} = $value WHERE guildId = $guildId;`,
             {
                 value: value,
                 guildId: interaction.guildId,
+            }
+        );
+    }
+
+    async linkStartExists(
+        interaction: BaseInteraction<CacheType>
+    ) {
+        const result: { channel: string, message: string }[] = await this.client.query(
+            "SELECT VALUE options.linkStart FROM ONLY guild WHERE guildId = $guildId LIMIT 1;",
+            {
+                guildId: interaction.guildId,
+            }
+        );
+
+        return result[0];
+    }
+
+    async setLinkStart(
+        interaction: BaseInteraction<CacheType>,
+        messageId: string
+    ) {
+        await this.client.query(
+            "UPDATE guild SET options.linkStart = { channel: $channelId, message: $messageId } WHERE guildId = $guildId;",
+            {
+                guildId: interaction.guildId,
+                channelId: interaction.channelId,
+                messageId: messageId,
             }
         );
     }
