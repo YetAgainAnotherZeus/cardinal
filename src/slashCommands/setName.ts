@@ -7,7 +7,7 @@ const command: SlashCommand = {
         .setName("set-name")
         .addBooleanOption((option) =>
             option
-                .setName("show-alternative-names")
+                .setName("show-spoiler-names")
                 .setDescription("Whether to show alternative names")
                 .setRequired(true)
         )
@@ -22,8 +22,8 @@ const command: SlashCommand = {
         .setDescription("Search for a character"),
     autocomplete: async (interaction) => {
         // get names from character
-        const showAlternativeNames = interaction.options.getBoolean(
-            "show-alternative-names"
+        const showSpoilerNames = interaction.options.getBoolean(
+            "show-spoiler-names"
         );
         const currentLink = await interaction.client.db.getCurrentLink(
             interaction
@@ -48,7 +48,7 @@ const command: SlashCommand = {
                     names.push(...entry[1]);
                 }
             });
-        if (showAlternativeNames) {
+        if (showSpoilerNames) {
             names.push(...characterNames.alternativeSpoiler);
         }
 
