@@ -7,7 +7,8 @@ import { ComponentButtonInteraction } from "../types";
 const button: ComponentButtonInteraction = {
     customId: "linkStartButton",
     execute: async (interaction) => {
-        const lastCharacterId = await interaction.client.anilist.getLatestCharacterId();
+        const lastCharacterId =
+            await interaction.client.anilist.getLatestCharacterId();
 
         if (typeof lastCharacterId === "object") {
             return handleApiError(interaction, lastCharacterId);
@@ -26,13 +27,16 @@ const button: ComponentButtonInteraction = {
             const characterId = Math.floor(Math.random() * lastCharacterId);
 
             if (tableGuild.options.isLinkUnique) {
-                const isCharacterAlreadyLinked = await interaction.client.db.isCharacterAlreadyLinked(interaction, characterId);
+                const isCharacterAlreadyLinked =
+                    await interaction.client.db.isCharacterAlreadyLinked(
+                        interaction,
+                        characterId
+                    );
 
                 if (isCharacterAlreadyLinked) {
                     continue;
                 }
             }
-
             const res = await interaction.client.anilist.getCharacterById(
                 characterId
             );
@@ -49,25 +53,45 @@ const button: ComponentButtonInteraction = {
             character = res;
         } while (!character);
 
-        await interaction.deferUpdate();
+        const response = await interaction.deferReply();
 
         await interaction.client.db.ensureCharacter(interaction, character.id);
 
         await handleRenameGuildMember(interaction, character.name.full);
 
-        const currentLink = await interaction.client.db.getCurrentLink(interaction);
-        if (currentLink) await interaction.client.db.unlinkCharacter(currentLink.id);
-        await interaction.client.db.linkCharacter(interaction, character.id, character.name.full);
+        const currentLink = await interaction.client.db.getCurrentLink(
+            interaction
+        );
+        if (currentLink)
+            await interaction.client.db.unlinkCharacter(currentLink.id);
+        if (!interaction.member) return;
+        await interaction.client.db.linkCharacter(
+            interaction.member,
+            character.id,
+            character.name.full
+        );
 
-        if (tableGuild.options.role?.remove && interaction.member && interaction.guild) {
-            const role = interaction.guild.roles.cache.get(tableGuild.options.role.remove);
+        if (
+            tableGuild.options.role?.remove &&
+            interaction.member &&
+            interaction.guild
+        ) {
+            const role = interaction.guild.roles.cache.get(
+                tableGuild.options.role.remove
+            );
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             await interaction.member.roles.remove(role);
         }
 
-        if (tableGuild.options.role?.add && interaction.member && interaction.guild) {
-            const role = interaction.guild.roles.cache.get(tableGuild.options.role.add);
+        if (
+            tableGuild.options.role?.add &&
+            interaction.member &&
+            interaction.guild
+        ) {
+            const role = interaction.guild.roles.cache.get(
+                tableGuild.options.role.add
+            );
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             await interaction.member.roles.add(role);
@@ -79,11 +103,11 @@ const button: ComponentButtonInteraction = {
                 `<@${interaction.user.id}>, You are now linked to \`${character.name.full}\``
             );
 
-        const message = await interaction.channel?.send({
+        await response.edit({
             embeds: [embed],
         });
         await new Promise((resolve) => setTimeout(resolve, 2000));
-        await message?.delete();
+        await response.delete();
     },
 };
 

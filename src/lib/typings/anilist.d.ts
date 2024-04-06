@@ -41,7 +41,7 @@ export interface CharacterSearch {
     pageInfo: {
         total: number;
     };
-    characters: Character[]
+    characters: Character[];
 }
 
 export interface ApiError {

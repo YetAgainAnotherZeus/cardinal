@@ -53,11 +53,22 @@ export function handleApiError(
 
 export async function handleRenameGuildMember(
     interaction: BaseInteraction<CacheType>,
-    nickname: string
+    nickname: string,
+    member?: GuildMember
 ) {
-    if (interaction.member instanceof GuildMember) {
+    if (interaction.member instanceof GuildMember && member === undefined) {
         try {
-            await interaction.member.setNickname(nickname);
+            await interaction.member.setNickname(nickname, "Character link");
+        } catch (error) {
+            interaction.client.logger.error(
+                `${chalk.blue(
+                    `[G#${interaction.guildId}][U#${interaction.user.id}]`
+                )} Can't set nickname to ${chalk.green(`[${nickname}]`)}`
+            );
+        }
+    } else if (member) {
+        try {
+            await member.setNickname(nickname, "Character link");
         } catch (error) {
             interaction.client.logger.error(
                 `${chalk.blue(

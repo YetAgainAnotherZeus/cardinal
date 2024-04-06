@@ -13,6 +13,7 @@ import { Anilist } from "./lib/anilist";
         intents: [
             GatewayIntentBits.Guilds,
             GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.GuildMembers,
             GatewayIntentBits.MessageContent,
         ],
     });

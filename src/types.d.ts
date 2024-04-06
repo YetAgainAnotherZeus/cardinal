@@ -18,6 +18,7 @@ export interface SlashCommand {
     autocomplete?: (interaction: AutocompleteInteraction) => void;
     modal?: (interaction: ModalSubmitInteraction<CacheType>) => void;
     cooldown?: number; // in seconds
+    devOnly?: boolean;
 }
 
 export interface ComponentButtonInteraction {

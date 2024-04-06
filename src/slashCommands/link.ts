@@ -1,6 +1,7 @@
 import {
     Colors,
     EmbedBuilder,
+    GuildMember,
     SlashCommandBuilder,
 } from "discord.js";
 import { SlashCommand } from "../types";
@@ -91,7 +92,7 @@ const command: SlashCommand = {
         }
 
         if (currentLink) await interaction.client.db.unlinkCharacter(currentLink.id);
-        await interaction.client.db.linkCharacter(interaction, id, character.name.full);
+        await interaction.client.db.linkCharacter(interaction.member as GuildMember, id, character.name.full);
 
         await handleRenameGuildMember(interaction, character.name.full);
 

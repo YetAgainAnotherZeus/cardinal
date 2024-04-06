@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, Events, Interaction } from "discord.js";
+import { Events, Interaction, User } from "discord.js";
 import { BotEvent } from "../types";
 import chalk from "chalk";
 import { displayInteractionOption } from "../lib/utils";
@@ -12,7 +12,9 @@ import { displayInteractionOption } from "../lib/utils";
 const event: BotEvent = {
     name: Events.InteractionCreate,
     execute: async (interaction: Interaction) => {
-        await interaction.client.db.ensureUser(interaction);
+        if (interaction.member) {
+            await interaction.client.db.ensureUser(interaction.member.user);
+        }
 
         if (interaction.isChatInputCommand()) {
             const command = interaction.client.slashCommands.get(

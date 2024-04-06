@@ -2,7 +2,7 @@ import { Root, Surreal } from "surrealdb.node";
 
 import { env } from "../env";
 import { FieldGuildOptions, TableCharacter, TableLink } from "./typings/database";
-import { BaseInteraction, CacheType, ChatInputCommandInteraction } from "discord.js";
+import { APIInteractionGuildMember, APIUser, BaseInteraction, CacheType, GuildMember, User } from "discord.js";
 import { ApiError } from "./typings/anilist";
 
 export class Database {
@@ -44,23 +44,23 @@ export class Database {
         return guild[0];
     }
 
-    async ensureUser(interaction: BaseInteraction<CacheType>) {
-        let user: { userId: string }[] = await this.client.query(
+    async ensureUser(user: User | APIUser) {
+        let res: { userId: string }[] = await this.client.query(
             "SELECT userId FROM user WHERE userId = $userId",
             {
-                userId: interaction.user.id,
+                userId: user.id,
             }
         );
 
-        if (!user.length) {
-            user = await this.client.create("user", {
-                userId: interaction.user.id,
-                name: interaction.user.username,
-                displayName: interaction.user.displayName,
+        if (!res.length) {
+            res = await this.client.create("user", {
+                userId: user.id,
+                name: user.username,
+                displayName: "displayName" in user ? user.displayName : user.global_name || "",
             });
         }
 
-        return user[0];
+        return res[0];
     }
 
     async ensureCharacter(
@@ -139,10 +139,11 @@ export class Database {
     }
 
     async linkCharacter(
-        interaction: BaseInteraction<CacheType>,
+        member: GuildMember | APIInteractionGuildMember,
         characterId: number,
         characterName: string
     ) {
+        member = member as GuildMember;
         const result: TableLink[] = await this.client.query(
             `CREATE ONLY link SET
             guild = type::thing((SELECT VALUE id FROM ONLY guild WHERE guildId = $guild LIMIT 1)),
@@ -150,8 +151,8 @@ export class Database {
             character = type::thing((SELECT VALUE id FROM ONLY character WHERE characterId = $character LIMIT 1)),
             name = $name;`,
             {
-                guild: interaction.guildId,
-                user: interaction.user.id,
+                guild: member.guild.id,
+                user: member.user.id,
                 character: characterId,
                 name: characterName,
             }
@@ -183,7 +184,7 @@ export class Database {
         interaction: BaseInteraction<CacheType>,
         key: FieldGuildOptions
     ) {
-        const result: boolean[] = await this.client.query(
+        const result: unknown[] = await this.client.query(
             `SELECT VALUE options.${key} FROM ONLY guild WHERE guildId = $guildId LIMIT 1;`,
             {
                 guildId: interaction.guildId,
