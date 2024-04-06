@@ -5,7 +5,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 import { SlashCommand } from "../types";
-import { handleApiError, handleRenameGuildMember } from "../lib/utils";
+import { autocompleteCharacterSearch, handleApiError, handleRenameGuildMember } from "../lib/utils";
 
 const command: SlashCommand = {
     command: new SlashCommandBuilder()
@@ -20,28 +20,7 @@ const command: SlashCommand = {
                 .setMinLength(2)
         )
         .setDescription("Link to a character"),
-    autocomplete: async (interaction) => {
-        const name = interaction.options.getFocused();
-
-        const data = await interaction.client.anilist.searchCharactersByName(
-            name
-        );
-
-        if ("status" in data) {
-            return interaction.respond([]);
-        }
-
-        interaction.respond(
-            data.characters.map((character) => {
-                let responseName = `${character.name.full} (${character.media.nodes[0].title.english ?? character.media.nodes[0].title.userPreferred})`;
-                responseName = responseName.length > 100 ? responseName.slice(0, 97) + "..." : responseName;
-                return {
-                    name: responseName,
-                    value: character.id.toString(),
-                };
-            })
-        );
-    },
+    autocomplete: autocompleteCharacterSearch,
     execute: async (interaction) => {
         const stringId = interaction.options.getString("name", true);
 
@@ -63,7 +42,7 @@ const command: SlashCommand = {
         }
 
         const currentLink = await interaction.client.db.getCurrentLink(
-            interaction
+            interaction.member as GuildMember
         );
 
         if (

@@ -1,7 +1,9 @@
 import {
     ApplicationCommandOptionType,
+    AutocompleteInteraction,
     BaseInteraction,
     CacheType,
+    ChatInputCommandInteraction,
     Colors,
     CommandInteractionOption,
     EmbedBuilder,
@@ -98,4 +100,27 @@ export function displayInteractionOption(
         .join(", ");
 
     return `[${options}]`;
+}
+
+export async function autocompleteCharacterSearch(interaction: AutocompleteInteraction<CacheType>) {
+    const name = interaction.options.getFocused();
+
+    const data = await interaction.client.anilist.searchCharactersByName(
+        name
+    );
+
+    if ("status" in data) {
+        return interaction.respond([]);
+    }
+
+    interaction.respond(
+        data.characters.map((character) => {
+            let responseName = `${character.name.full} (${character.media.nodes[0].title.english ?? character.media.nodes[0].title.userPreferred})`;
+            responseName = responseName.length > 100 ? responseName.slice(0, 97) + "..." : responseName;
+            return {
+                name: responseName,
+                value: character.id.toString(),
+            };
+        })
+    );
 }

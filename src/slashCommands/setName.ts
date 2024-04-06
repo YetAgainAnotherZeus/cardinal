@@ -1,4 +1,4 @@
-import { Colors, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { Colors, EmbedBuilder, GuildMember, SlashCommandBuilder } from "discord.js";
 import { SlashCommand } from "../types";
 import { handleRenameGuildMember } from "../lib/utils";
 
@@ -26,7 +26,7 @@ const command: SlashCommand = {
             "show-spoiler-names"
         );
         const currentLink = await interaction.client.db.getCurrentLink(
-            interaction
+            interaction.member as GuildMember
         );
 
         if (!currentLink) {
@@ -66,7 +66,7 @@ const command: SlashCommand = {
         const name = interaction.options.getString("name", true);
 
         const currentLink = await interaction.client.db.getCurrentLink(
-            interaction
+            interaction.member as GuildMember
         );
 
         if (!currentLink) {

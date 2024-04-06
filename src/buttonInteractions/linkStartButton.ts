@@ -1,4 +1,4 @@
-import { Colors, EmbedBuilder } from "discord.js";
+import { Colors, EmbedBuilder, GuildMember } from "discord.js";
 import { Character } from "../lib/typings/anilist";
 import { TableGuild } from "../lib/typings/database";
 import { handleApiError, handleRenameGuildMember } from "../lib/utils";
@@ -60,7 +60,7 @@ const button: ComponentButtonInteraction = {
         await handleRenameGuildMember(interaction, character.name.full);
 
         const currentLink = await interaction.client.db.getCurrentLink(
-            interaction
+            interaction.member as GuildMember
         );
         if (currentLink)
             await interaction.client.db.unlinkCharacter(currentLink.id);

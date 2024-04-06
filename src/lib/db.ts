@@ -126,12 +126,12 @@ export class Database {
         return Boolean(result[0]);
     }
 
-    async getCurrentLink(interaction: BaseInteraction<CacheType>): Promise<TableLink | undefined> {
+    async getCurrentLink(member: GuildMember): Promise<TableLink | undefined> {
         const link: TableLink[] = await this.client.query(
             "SELECT * FROM ONLY link WHERE user.userId = $userId AND guild.guildId = $guildId LIMIT 1 FETCH user, guild, character;",
             {
-                userId: interaction.user.id,
-                guildId: interaction.guildId,
+                userId: member.user.id,
+                guildId: member.guild.id,
             }
         );
 
