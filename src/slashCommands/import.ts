@@ -135,7 +135,7 @@ const command: SlashCommand = {
         embed
             .setColor(Colors.Green)
             .setTitle("Import complete")
-            .setDescription(`Linked: ${result.success.join(", ") ?? "None"}\nFailed: ${result.failure.join(", ") ?? "None"}`);
+            .setDescription(`Linked: ${result.success.join(", ") || "None"}\nFailed: ${result.failure.join(", ") || "None"}`);
         await interaction.editReply({
             embeds: [embed],
         });
