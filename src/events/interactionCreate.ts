@@ -1,4 +1,4 @@
-import { Events, Interaction, User } from "discord.js";
+import { Events, Interaction } from "discord.js";
 import { BotEvent } from "../types";
 import chalk from "chalk";
 import { displayInteractionOption } from "../lib/utils";

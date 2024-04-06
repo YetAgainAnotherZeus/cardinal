@@ -3,7 +3,6 @@ import {
     AutocompleteInteraction,
     BaseInteraction,
     CacheType,
-    ChatInputCommandInteraction,
     Colors,
     CommandInteractionOption,
     EmbedBuilder,
