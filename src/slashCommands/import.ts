@@ -1,6 +1,7 @@
 import {
     Colors,
     EmbedBuilder,
+    GuildMember,
     SlashCommandBuilder,
 } from "discord.js";
 import { SlashCommand } from "../types";
@@ -60,16 +61,22 @@ const command: SlashCommand = {
             embeds: [embed],
         });
 
-        const guildTable: { add?: string, remove?: string } = await interaction.client.db.getGuildOption(interaction, "role") as { add?: string, remove?: string };
+        const guildTable: Record<string, string> = await interaction.client.db.getGuildOption(guild, "role") as Record<string, string>;
 
-        const members = (await guild.members.fetch()).filter(
+        let members: GuildMember[] = [];
+
+        for await (const member of (await guild.members.fetch()).values()) {
+            members.push(member);
+        }
+
+        members = members.filter(
             (member) => {
                 if (guildTable.add && guildTable.remove) {
-                    return !member.user.bot && member.roles.cache.has(guildTable.add) && !member.roles.cache.has(guildTable.remove);
+                    return !member.user.bot && !member.roles.cache.has(guildTable.add) && member.roles.cache.has(guildTable.remove);
                 } else if (guildTable.add) {
-                    return !member.user.bot && member.roles.cache.has(guildTable.add);
+                    return !member.user.bot && !member.roles.cache.has(guildTable.add);
                 } else if (guildTable.remove) {
-                    return !member.user.bot && !member.roles.cache.has(guildTable.remove);
+                    return !member.user.bot && member.roles.cache.has(guildTable.remove);
                 } else {
                     return !member.user.bot;
                 }
@@ -85,14 +92,14 @@ const command: SlashCommand = {
 
         for (const [key, member] of members.entries()) {
             embed.setDescription(
-                `Importing user ${memberArray.indexOf(key) + 1}/${members.size}`
+                `Importing user ${memberArray.indexOf(key) + 1}/${members.length}`
             );
             await interaction.editReply({
                 embeds: [embed],
             });
             await interaction.client.db.ensureUser(member.user);
 
-            if (!member.nickname) return;
+            if (!member.nickname) continue;
 
             const res = await interaction.client.anilist.searchCharactersByName(
                 member.nickname

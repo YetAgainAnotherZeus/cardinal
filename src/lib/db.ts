@@ -180,13 +180,13 @@ export class Database {
     }
 
     async getGuildOption(
-        interaction: BaseInteraction<CacheType>,
+        guild: Guild,
         key: FieldGuildOptions
     ) {
         const result: unknown[] = await this.client.query(
             `SELECT VALUE options.${key} FROM ONLY guild WHERE guildId = $guildId LIMIT 1;`,
             {
-                guildId: interaction.guildId,
+                guildId: guild.id,
             }
         );
 

@@ -11,7 +11,7 @@ import {
 import { ApiError } from "./typings/anilist";
 import chalk from "chalk";
 
-export function handleApiError(
+export async function handleApiError(
     interaction: BaseInteraction<CacheType>,
     error: ApiError
 ) {
@@ -47,9 +47,13 @@ export function handleApiError(
                 helpMessage ? `\n${helpMessage}` : ""
             }`
         );
-    return interaction.channel?.send({
+    const message = await interaction.channel?.send({
         embeds: [embed],
     });
+    if (message) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await message.delete();
+    }
 }
 
 export async function handleRenameGuildMember(
