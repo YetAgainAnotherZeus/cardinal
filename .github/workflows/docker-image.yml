@@ -1,15 +1,18 @@
-name: Docker Image CI
+name: Docker Image CI for GHCR
 
 on:
   push:
     branches:
-    - release/*
+    - main
   workflow_dispatch:
 
 jobs:
-  build:
+  build_and_publish:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag cardinal:$(date +%s)
+    - uses: actions/checkout@v4
+    - name: Build and push the Docker image
+      run: |
+        docker login --username yetagainanotherzeus --password ${{ secrets.GH_PAT }} ghcr.io
+        docker build . --file Dockerfile --tag ghcr.io/yetagainanotherzeus/cardinal:latest
+        docker push ghcr.io/yetagainanotherzeus/cardinal:latest

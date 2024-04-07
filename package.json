@@ -10,8 +10,8 @@
         "start:env": "node --env-file .env .",
         "build": "tsc",
         "copy:locales": "copyfiles --error --up 1 ./src/i18n/locales/**/*.* ./build",
-        "docker:build": "docker build --pull --rm -f \"Dockerfile\" -t cardinal4:latest \".\"",
-        "docker:run": "docker run --rm -it --env-file .env cardinal4:latest"
+        "docker:build": "docker build --pull --rm -f \"Dockerfile\" -t cardinal:latest \".\"",
+        "docker:run": "docker run --rm -it --env-file .env cardinal:latest"
     },
     "engines": {
         "node": ">=20.6.0"
