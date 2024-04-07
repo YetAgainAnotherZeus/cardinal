@@ -2,7 +2,7 @@ import { Root, Surreal } from "surrealdb.node";
 
 import { env } from "../env";
 import { FieldGuildOptions, TableCharacter, TableLink } from "./typings/database";
-import { APIInteractionGuildMember, APIUser, BaseInteraction, CacheType, GuildMember, User } from "discord.js";
+import { APIInteractionGuildMember, APIUser, BaseInteraction, CacheType, Guild, GuildMember, User } from "discord.js";
 import { ApiError } from "./typings/anilist";
 
 export class Database {
@@ -25,23 +25,22 @@ export class Database {
         await this.client.use({ ns: env.DATABASE_NAMESPACE, db: "cardinal" });
     }
 
-    async ensureGuild(interaction: BaseInteraction<CacheType>) {
-        let guild: { guildId: string }[] = await this.client.query(
+    async ensureGuild(guild: Guild) {
+        let guildExists: { guildId: string }[] = await this.client.query(
             "SELECT guildId FROM guild WHERE guildId = $guildId",
             {
-                guildId: interaction.guildId,
+                guildId: guild.id,
             }
         );
 
-        if (!guild.length) {
-            const guildName = interaction.guild ? interaction.guild.name : "";
-            guild = await this.client.create("guild", {
-                guildId: interaction.guildId,
-                name: guildName,
+        if (!guildExists.length) {
+            guildExists = await this.client.create("guild", {
+                guildId: guild.id,
+                name: guild.name,
             });
         }
 
-        return guild[0];
+        return guildExists[0];
     }
 
     async ensureUser(user: User | APIUser) {
