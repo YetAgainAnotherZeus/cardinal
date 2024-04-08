@@ -67,7 +67,7 @@ export async function handleRenameGuildMember(
         } catch (error) {
             interaction.client.logger.error(
                 `${chalk.blue(
-                    `[G#${interaction.guildId}][U#${interaction.user.id}]`
+                    `[G#${interaction.guildId}] [U#${interaction.user.id}]`
                 )} Can't set nickname to ${chalk.green(`[${nickname}]`)}`
             );
         }
@@ -77,7 +77,7 @@ export async function handleRenameGuildMember(
         } catch (error) {
             interaction.client.logger.error(
                 `${chalk.blue(
-                    `[G#${interaction.guildId}][U#${interaction.user.id}]`
+                    `[G#${interaction.guildId}] [U#${interaction.user.id}]`
                 )} Can't set nickname to ${chalk.green(`[${nickname}]`)}`
             );
         }
