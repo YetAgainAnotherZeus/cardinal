@@ -29,7 +29,8 @@ import { Anilist } from "./lib/anilist";
     await dbclient.init();
     
     client.db = dbclient;
-    client.anilist = new Anilist({ maxRequests: 1, perMilliseconds: 750 });
+    // client.anilist = new Anilist({ maxRequests: 1, perMilliseconds: 750, maxRPS: 1.5 });
+    client.anilist = new Anilist({ maxRequests: 1, perMilliseconds: 1000, maxRPS: 1 });
 
     const handlersDir = join(__dirname, "./handlers");
     readdirSync(handlersDir).forEach((handler) => {

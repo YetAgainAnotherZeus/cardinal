@@ -61,45 +61,50 @@ const command: SlashCommand = {
             embeds: [embed],
         });
 
-        const guildTable: Record<string, string> = await interaction.client.db.getGuildOption(guild, "role") as Record<string, string>;
+        // const guildTable: Record<string, string> = await interaction.client.db.getGuildOption(guild, "role") as Record<string, string>;
 
-        let members: GuildMember[] = [];
+        const fetchedMembers = await guild.members.fetch();
 
-        for await (const member of (await guild.members.fetch()).values()) {
+        const members: GuildMember[] = [];
+
+        for (const member of fetchedMembers.values()) {
+            if (member.user.bot) {
+                interaction.client.logger.info(`Skipping ${member.user.username} as they are a bot`);
+                continue;
+            }
+
+            if (!member.nickname) {
+                interaction.client.logger.info(`Skipping ${member.user.username} as they have no nickname`);
+                continue;
+            }
+
+            const currentLink = await interaction.client.db.getCurrentLink(member);
+
+            if (currentLink) {
+                interaction.client.logger.info(`Skipping ${member.nickname} as they are already linked`);
+                continue;
+            }
+
             members.push(member);
         }
 
-        members = members.filter(
-            (member) => {
-                if (guildTable.add && guildTable.remove) {
-                    return !member.user.bot && !member.roles.cache.has(guildTable.add) && member.roles.cache.has(guildTable.remove);
-                } else if (guildTable.add) {
-                    return !member.user.bot && !member.roles.cache.has(guildTable.add);
-                } else if (guildTable.remove) {
-                    return !member.user.bot && member.roles.cache.has(guildTable.remove);
-                } else {
-                    return !member.user.bot;
-                }
-            }
-        );
-
-        const memberArray = Array.from(members.keys());
-
         const result: { success: string[], failure: string[] } = {
             success: [],
-            failure: [],
+            failure: []
         };
 
         for (const [key, member] of members.entries()) {
             embed.setDescription(
-                `Importing user ${memberArray.indexOf(key) + 1}/${members.length}`
+                `Importing user ${key + 1}/${members.length}`
             );
             await interaction.editReply({
                 embeds: [embed],
             });
             await interaction.client.db.ensureUser(member.user);
 
-            if (!member.nickname) continue;
+            if (!member.nickname) {
+                continue;
+            }
 
             const res = await interaction.client.anilist.searchCharactersByName(
                 member.nickname
@@ -108,7 +113,7 @@ const command: SlashCommand = {
             if ("status" in res) {
                 embed
                     .setDescription(
-                        "An error occurred while searching for the character"
+                        `An error occurred while searching for ${member.nickname}. ${key + 1}/${members.length}\n\nLinked(${result.success.length}): ${result.success.join(", ") || "None"}\nFailed(${result.failure.length}): ${result.failure.join(", ") || "None"}\nTotal: ${members.length - result.failure.length - result.success.length} users`
                     )
                     .setColor(Colors.Red);
                 await interaction.editReply({
@@ -122,7 +127,7 @@ const command: SlashCommand = {
 
                 await interaction.client.db.ensureCharacter(
                     interaction,
-                    character.id
+                    character
                 );
 
                 await interaction.client.db.linkCharacter(
@@ -142,7 +147,7 @@ const command: SlashCommand = {
         embed
             .setColor(Colors.Green)
             .setTitle("Import complete")
-            .setDescription(`Linked: ${result.success.join(", ") || "None"}\nFailed: ${result.failure.join(", ") || "None"}`);
+            .setDescription(`Linked(${result.success.length}): ${result.success.join(", ") || "None"}\nFailed(${result.failure.length}): ${result.failure.join(", ") || "None"}\nTotal: ${members.length} users`);
         await interaction.editReply({
             embeds: [embed],
         });

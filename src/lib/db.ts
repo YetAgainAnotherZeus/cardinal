@@ -3,7 +3,7 @@ import { Root, Surreal } from "surrealdb.node";
 import { env } from "../env";
 import { FieldGuildOptions, TableCharacter, TableLink } from "./typings/database";
 import { APIInteractionGuildMember, APIUser, BaseInteraction, CacheType, Guild, GuildMember, User } from "discord.js";
-import { ApiError } from "./typings/anilist";
+import { ApiError, Character } from "./typings/anilist";
 
 export class Database {
     public client: Surreal;
@@ -64,19 +64,19 @@ export class Database {
 
     async ensureCharacter(
         interaction: BaseInteraction<CacheType>,
-        characterId: number
+        character: number | Character,
     ): Promise<TableCharacter | ApiError> {
-        let character: TableCharacter | undefined = await this.client
+        let tableCharacter: TableCharacter | undefined = await this.client
             .query("SELECT * FROM character WHERE characterId = $characterId", {
-                characterId: characterId,
+                characterId: typeof character === "object" ? character.id : character,
             })
             .then((query: TableCharacter[]) => {
                 return query[0];
             });
 
-        if (!character) {
-            const charData = await interaction.client.anilist.getCharacterById(
-                characterId
+        if (!tableCharacter) {
+            const charData = typeof character === "object" ? character : await interaction.client.anilist.getCharacterById(
+                character
             );
 
             if ("status" in charData) return charData;
@@ -91,10 +91,10 @@ export class Database {
                 }
             );
 
-            character = query[0];
+            tableCharacter = query[0];
         }
 
-        return character;
+        return tableCharacter;
     }
 
     async isGuildLinkUnique(
